@@ -24,11 +24,25 @@ class AppointmentPolicy
         return false;
     }
 
+    public function confirm(User $user, Appointment $appointment): bool
+    {
+        return $user->role === 'doctor'
+            && $user->id === $appointment->doctor->user_id
+            && $appointment->status === 'pending';
+    }
+
     public function cancel(User $user, Appointment $appointment): bool
     {
-        // Patient can cancel their own; doctor can cancel theirs
-        return $user->id === $appointment->patient->user_id
-            || $user->id === $appointment->doctor->user_id;
+        if ($appointment->status === 'cancelled') {
+            return false;
+        }
+
+        if ($user->role === 'patient') {
+            return $user->id === $appointment->patient->user_id
+                && $appointment->status === 'pending';
+        }
+
+        return $user->id === $appointment->doctor->user_id;
     }
 
     /**
@@ -44,7 +58,9 @@ class AppointmentPolicy
      */
     public function update(User $user, Appointment $appointment): bool
     {
-        return false;
+        return $user->role === 'patient'
+            && $user->id === $appointment->patient->user_id
+            && $appointment->status === 'pending';
     }
 
     /**

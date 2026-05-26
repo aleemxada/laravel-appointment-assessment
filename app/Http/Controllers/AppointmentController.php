@@ -102,7 +102,7 @@ class AppointmentController extends Controller
      */
     public function edit(Appointment $appointment): View
     {
-        $this->authorize('cancel', $appointment);
+        $this->authorize('update', $appointment);
 
         $doctors = Doctor::with('user')->get();
 
@@ -114,7 +114,7 @@ class AppointmentController extends Controller
      */
     public function update(BookAppointmentRequest $request, Appointment $appointment): RedirectResponse
     {
-        $this->authorize('cancel', $appointment);
+        $this->authorize('update', $appointment);
 
         $appointment->update([
             'doctor_id'    => $request->doctor_id,
@@ -127,11 +127,17 @@ class AppointmentController extends Controller
             ->with('success', 'Appointment updated successfully.');
     }
 
-    /**
-     * Cancel an appointment.
-     * $this->authorize() uses AppointmentPolicy — Task 3 requirement.
-     * Route model binding resolves {appointment} automatically — Task 3 requirement.
-     */
+    public function confirm(Appointment $appointment): RedirectResponse
+    {
+        $this->authorize('confirm', $appointment);
+
+        $appointment->update(['status' => 'confirmed']);
+
+        return redirect()
+            ->route('appointments.index')
+            ->with('success', 'Appointment confirmed.');
+    }
+
     public function destroy(Appointment $appointment): RedirectResponse
     {
         $this->authorize('cancel', $appointment);  // AppointmentPolicy::cancel()
