@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Appointment extends Model
 {
@@ -13,7 +15,7 @@ class Appointment extends Model
         'status',
         'notes',
     ];
-    
+
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);
@@ -31,4 +33,8 @@ class Appointment extends Model
                     ->where('status', '!=', 'cancelled')
                     ->orderBy('scheduled_at');
     }
+
+    protected $casts = [
+        'scheduled_at' => 'datetime',
+    ];
 }
